@@ -17,8 +17,8 @@ public class MovementUtil {
   private static final OI oi = SubsystemManager.getOI();
 
   private static final PIDController rotationPID = new PIDController(0.08, 0, 0);
-  private final PIDController movementXPID = new PIDController(0.5, 0, 0);
-  private final PIDController movementYPID = new PIDController(0.5, 0, 0);
+  private static final PIDController movementXPID = new PIDController(0.5, 0, 0);
+  private static final PIDController movementYPID = new PIDController(0.5, 0, 0);
 
   public static void configure(
           Translation2d desiredPose,
@@ -37,31 +37,31 @@ public class MovementUtil {
   }
 
   public static void setLocked(Translation2d targetLock) {
-    this.locked = true;
-    this.useRotation = false;
-    this.targetLock = targetLock;
+    MovementUtil.locked = true;
+    MovementUtil.useRotation = false;
+    MovementUtil.targetLock = targetLock;
   }
 
   public static void setLocked(Rotation2d desiredRotation) {
-    this.locked = true;
-    this.useRotation = true;
-    this.desiredRotation = desiredRotation;
+    MovementUtil.locked = true;
+    MovementUtil.useRotation = true;
+    MovementUtil.desiredRotation = desiredRotation;
   }
 
   public static void setLocked(boolean locked) {
-    this.locked = locked;
+    MovementUtil.locked = locked;
   }
 
   public static void setToDesired(Translation2d desiredPose) {
-    this.toDesired = true;
-    this.desiredPose = desiredPose;
+    MovementUtil.toDesired = true;
+    MovementUtil.desiredPose = desiredPose;
   }
 
   public static void setToDesired(boolean toDesired) {
-    this.toDesired = toDesired;
+    MovementUtil.toDesired = toDesired;
   }
 
-  public Rotation2d getDesiredRotation(Pose2d robotPose) {
+  public static Rotation2d getDesiredRotation(Pose2d robotPose) {
     if (useRotation) {
       return desiredRotation;
     } else {
@@ -76,7 +76,7 @@ public class MovementUtil {
     }
   }
 
-  public Translation2d getPoseOffset(Pose2d robotPose) {
+  public static Translation2d getPoseOffset(Pose2d robotPose) {
     Translation2d currTranslation = robotPose.getTranslation();
     double currX = currTranslation.getX();
     double currY = currTranslation.getY();
@@ -124,20 +124,20 @@ public class MovementUtil {
     toDesired = false;
   }
 
-  public boolean atTranslation(Pose2d robotPose) {
+  public static boolean atTranslation(Pose2d robotPose) {
     Translation2d currDiff = getPoseOffset(robotPose);
     double x = Math.abs(currDiff.getX());
     double y = Math.abs(currDiff.getY());
     return x < 0.02 && y < 0.02;
   }
 
-  public boolean atRotation(Pose2d robotPose) {
+  public static boolean atRotation(Pose2d robotPose) {
     double rotationDiffDegrees =
         Math.abs(desiredRotation.minus(robotPose.getRotation()).getDegrees());
     return rotationDiffDegrees < 5;
   }
 
-  public boolean atPose(Pose2d robotPose) {
+  public static boolean atPose(Pose2d robotPose) {
     if (toDesired && locked) {
       return atTranslation(robotPose) && atRotation(robotPose);
     } else {

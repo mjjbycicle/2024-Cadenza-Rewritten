@@ -14,6 +14,8 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.constants.FieldConstants.*;
+import static frc.robot.constants.FieldConstants.speaker_blue;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
@@ -36,10 +38,12 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.constants.RobotInfo.DriveInfo.*;
 import frc.robot.subsystems.drive.gyro.GyroIO;
 import frc.robot.subsystems.drive.gyro.GyroIOInputsAutoLogged;
 import frc.robot.subsystems.drive.modules.Module;
 import frc.robot.subsystems.drive.modules.ModuleIO;
+import frc.robot.util.DriverStationUtil;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.MovementUtil;
 import java.util.concurrent.locks.Lock;
@@ -73,6 +77,10 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
+  private DriveMode driveMode;
+  private final Pose2d amp, manualSpeaker;
+  private final Translation2d speaker;
+  
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -131,6 +139,17 @@ public class Drive extends SubsystemBase {
                 },
                 null,
                 this));
+    
+    driveMode = DriveMode.MANUAL_DRIVE;
+    if (DriverStationUtil.isRed()) {
+      amp = amp_red;
+      speaker = speaker_red;
+      manualSpeaker = manualSpeaker_red;
+    } else {
+      amp = amp_blue;
+      speaker = speaker_blue;
+      manualSpeaker = manualSpeaker_blue;
+    }
   }
 
   public void periodic() {
@@ -189,6 +208,21 @@ public class Drive extends SubsystemBase {
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
     runVelocity();
+
+    switch (driveMode) {
+      case DRIVE_TO_AMP:
+        driveToPose(amp);
+        break;
+      case LOCK_TO_AMP:
+        driveLocked(amp.getTranslation());
+        break;
+      case LOCK_TO_SPEAKER:
+        driveLocked(speaker);
+      case MANUAL_DRIVE:
+        driveManual();
+      case DRIVE_TO_SPEAKER:
+        driveToPose(manualSpeaker);
+    }
   }
 
   /**
@@ -218,7 +252,7 @@ public class Drive extends SubsystemBase {
     runVelocity(MovementUtil.getRobotRelative(getPose()));
   }
 
-  /** Stops the drive. */
+  /** Stops the  */
   public void stop() {
     runVelocity(new ChassisSpeeds());
   }
@@ -333,5 +367,29 @@ public class Drive extends SubsystemBase {
 
   public void resetMovement() {
     MovementUtil.reset();
+  }
+
+  public void driveLocked(Translation2d pose) {
+    resetMovement();
+    setLocked(pose);
+  }
+
+  public void driveManual() {
+    resetMovement();
+  }
+
+  public void driveTo(Translation2d pose) {
+    resetMovement();
+    setToDesired(pose);
+  }
+
+  public void driveToPose(Pose2d targetPose) {
+    resetMovement();
+    setLocked(targetPose.getRotation());
+    setToDesired(targetPose.getTranslation());
+  }
+
+  public void setDriveMode(DriveMode mode){
+    this.driveMode = mode;
   }
 }

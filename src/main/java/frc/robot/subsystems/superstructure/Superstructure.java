@@ -1,121 +1,216 @@
 package frc.robot.subsystems.superstructure;
 
-import static frc.robot.constants.FieldConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.RobotInfo.DriveInfo.*;
-import frc.robot.constants.RobotInfo.IntakeInfo.*;
 import frc.robot.constants.RobotInfo.ShooterInfo.*;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.intake.IntakeSuperstructure;
 import frc.robot.subsystems.shooter.ShooterSuperStructure;
-import frc.robot.util.DriverStationUtil;
+import frc.robot.util.ControllerUtil;
+import frc.robot.util.MovementUtil;
 
 public class Superstructure extends SubsystemBase {
-  private final Drive drive;
-  private final ShooterSuperStructure shooter;
+    private final Drive drive;
+    private final ShooterSuperStructure shooter;
+    private final IntakeSuperstructure intake;
 
-  private ShooterMode shootingMode;
-  private DriveMode driveMode;
-  private IntakeMode intakeMode;
+    private Action currentAction;
 
-  private final Pose2d amp;
-  private final Translation2d speaker;
+    private Pose2d currentPose;
 
-  private Pose2d currentPose;
-
-  private enum Action {
-    AUTO_AMP,
-    MOVING_SPEAKER,
-    MANUAL_SPEAKER,
-    MANUAL_INTAKE
-  }
-
-  public Superstructure() {
-    drive = SubsystemManager.getDrive();
-    shooter = SubsystemManager.getShooter();
-    if (DriverStationUtil.isRed()) {
-      amp = amp_red;
-      speaker = speaker_red;
-    } else {
-      amp = amp_blue;
-      speaker = speaker_blue;
+    public enum Action {
+        AUTO_AMP,
+        MOVING_SPEAKER,
+        MANUAL_SPEAKER,
+        MANUAL_INTAKE,
+        MANUAL_DRIVE,
+        AUTO_LAUNCH,
+        LAUNCH_SPINUP,
+        OUTTAKE,
+        EXTEND_INTAKE,
+        RETRACT_INTAKE
     }
-    currentPose = drive.getPose();
-  }
 
-  @Override
-  public void periodic() {
-    currentPose = drive.getPose();
-    shooter.updatePose(currentPose);
-  }
-
-  public void runDriveState() {
-    switch (driveMode) {
-      case DRIVE_TO_AMP:
-        driveToPose(amp);
-        break;
-      case LOCK_TO_AMP:
-        driveLocked(amp.getTranslation());
-        break;
-      case LOCK_TO_SPEAKER:
-        driveLocked(speaker);
-      case MANUAL_DRIVE:
-        driveManual();
+    public Superstructure() {
+        drive = SubsystemManager.getDrive();
+        shooter = SubsystemManager.getShooter();
+        intake = SubsystemManager.getIntake();
+        currentPose = drive.getPose();
     }
-  }
 
-  public void runShooterState() {
-    switch (shootingMode) {
-      case AMP:
-        shootAmp();
-        break;
-      case AUTO_SPEAKER:
-        shootSpeaker();
-        break;
-      case MANUAL_SPEAKER:
-        manualSpeaker();
-        break;
-      case AUTO_LAUNCH:
-        launch();
-        break;
+    @Override
+    public void periodic() {
+        currentPose = drive.getPose();
+        shooter.updatePose(currentPose);
+        runDriveAction();
+        runShooterAction();
+        runIntakeAction();
     }
-  }
 
-  public void driveLocked(Translation2d pose) {
-    drive.resetMovement();
-    drive.setLocked(pose);
-  }
+    public void runShooterAction() {
+        switch (currentAction) {
+            case AUTO_AMP:
+                if (ControllerUtil.getAmpShot()) {
+                    shootAmp();
+                }
+            case MOVING_SPEAKER:
+                if (ControllerUtil.getSpeakerShot()) {
+                    shootSpeaker();
+                }
+            case MANUAL_SPEAKER:
+                manualSpeaker();
+            case LAUNCH_SPINUP, AUTO_LAUNCH:
+                launch();
+            default:
+                shooterIdle();
+        }
+    }
 
-  public void driveManual() {
-    drive.resetMovement();
-  }
+    public void runIntakeAction() {
+        switch (currentAction) {
+            case AUTO_AMP, MOVING_SPEAKER, MANUAL_SPEAKER, AUTO_LAUNCH:
+                hopperShoot();
+            case MANUAL_INTAKE:
+                intake();
+            case OUTTAKE:
+                outtake();
+            case EXTEND_INTAKE:
+                extendIntake();
+            case RETRACT_INTAKE:
+                retractIntake();
+            default:
+                stopIntake();
+        }
+    }
 
-  public void driveTo(Translation2d pose) {
-    drive.resetMovement();
-    drive.setToDesired(pose);
-  }
+    public void runDriveAction() {
+        if (ControllerUtil.idle()) {
+            currentAction = Action.MANUAL_DRIVE;
+        }
+        switch (currentAction) {
+            case AUTO_AMP:
+                driveToAmp();
+            case MOVING_SPEAKER:
+                lockToSpeaker();
+            case LAUNCH_SPINUP:
+                lockToAmp();
+            case AUTO_LAUNCH:
+                lockToAmp();
+            default:
+                manualDrive();
+        }
+    }
 
-  public void driveToPose(Pose2d targetPose) {
-    drive.resetMovement();
-    drive.setLocked(targetPose.getRotation());
-    drive.setToDesired(targetPose.getTranslation());
-  }
+    public void driveToAmp() {
+        drive.setDriveMode(DriveMode.DRIVE_TO_AMP);
+    }
 
-  public void shootSpeaker() {
-    shooter.setShootingMode(ShooterMode.AUTO_SPEAKER);
-  }
+    public void driveToSpeaker() {
+        drive.setDriveMode(DriveMode.DRIVE_TO_SPEAKER);
+    }
 
-  public void manualSpeaker() {
-    shooter.setShootingMode(ShooterMode.MANUAL_SPEAKER);
-  }
+    public void lockToSpeaker() {
+        drive.setDriveMode(DriveMode.LOCK_TO_SPEAKER);
+    }
 
-  public void shootAmp() {
-    shooter.setShootingMode(ShooterMode.AMP);
-  }
+    public void lockToAmp() {
+        drive.setDriveMode(DriveMode.LOCK_TO_AMP);
+    }
 
-  public void launch() {
-    shooter.setShootingMode(ShooterMode.AUTO_LAUNCH);
-  }
+    public void manualDrive() {
+        drive.setDriveMode(DriveMode.MANUAL_DRIVE);
+    }
+
+    public void shootSpeaker() {
+        shooter.setShootingMode(ShooterMode.AUTO_SPEAKER);
+    }
+
+    public void manualSpeaker() {
+        shooter.setShootingMode(ShooterMode.MANUAL_SPEAKER);
+    }
+
+    public void shootAmp() {
+        shooter.setShootingMode(ShooterMode.AMP);
+    }
+
+    public void launch() {
+        shooter.setShootingMode(ShooterMode.AUTO_LAUNCH);
+    }
+
+    public void shooterIdle() {
+        shooter.setShootingMode(ShooterMode.TELEOP_IDLE);
+    }
+
+    public void intake() {
+        intake.intake();
+    }
+
+    public void outtake() {
+        intake.outtake();
+    }
+
+    public void hopperShoot() {
+        intake.shoot();
+    }
+
+    public void stopIntake() {
+        intake.stop();
+    }
+
+    public void extendIntake() {
+        intake.extendIntake();
+    }
+
+    public void retractIntake() {
+        intake.retractIntake();
+    }
+
+    public Command extendIntakeCommand() {
+        return new RunCommand(() -> currentAction = Action.EXTEND_INTAKE, intake, drive, shooter);
+    }
+
+    public Command retractIntakeCommand() {
+        return new RunCommand(() -> currentAction = Action.RETRACT_INTAKE, intake, drive, shooter);
+    }
+
+    public Command intakeCommand() {
+        return new RunCommand(() -> currentAction = Action.MANUAL_INTAKE, intake, drive, shooter);
+    }
+
+    public Command outtakeCommand() {
+        return new RunCommand(() -> currentAction = Action.OUTTAKE, intake, drive, shooter);
+    }
+
+    public Command movingSpeakerCommand() {
+        return new RunCommand(() -> currentAction = Action.MOVING_SPEAKER, intake, drive, shooter);
+    }
+
+    public Command autoAmpCommand() {
+        return new RunCommand(() -> currentAction = Action.AUTO_AMP, intake, drive, shooter);
+    }
+
+    public Command autoLaunchCommand() {
+        return new RunCommand(() -> currentAction = Action.AUTO_LAUNCH, intake, drive, shooter);
+    }
+
+    public Command launchSpinupCommand() {
+        return new RunCommand(() -> currentAction = Action.LAUNCH_SPINUP, intake, drive, shooter);
+    }
+
+    public Command manualSpeakerCommand() {
+        return new RunCommand(() -> currentAction = Action.MANUAL_SPEAKER, intake, drive, shooter);
+    }
+
+    public Command manualDriveCommand() {
+        return new RunCommand(() -> currentAction = Action.MANUAL_DRIVE, intake, drive, shooter);
+    }
+
+    public Command toggleIRCommand() {
+        return new RunCommand(intake::toggleIR);
+    }
 }

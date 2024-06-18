@@ -6,6 +6,7 @@ public class RobotInfo {
   public static class DriveInfo {
     public enum DriveMode {
       DRIVE_TO_AMP,
+      DRIVE_TO_SPEAKER,
       LOCK_TO_AMP,
       LOCK_TO_SPEAKER,
       MANUAL_DRIVE
@@ -47,7 +48,7 @@ public class RobotInfo {
       AUTO_SPEAKER,
       TELEOP_IDLE,
       AUTO_IDLE,
-      AUTO_LAUNCH
+      AUTO_LAUNCH,
     }
   }
 
@@ -60,6 +61,17 @@ public class RobotInfo {
     public enum ExtenstionState {
       EXTENDED,
       RETRACTED
+    }
+
+    public enum NoteState {
+      INTAKING,
+      OUTTAKING,
+      RAW_HOPPER,
+      LOADED_HOPPER,
+      SHOOTING,
+      RAW_EXTENDED,
+      RAW_RETRACTED,
+      NOT_POSSESSED
     }
 
     public static final double intakeSpeed = -0.85;

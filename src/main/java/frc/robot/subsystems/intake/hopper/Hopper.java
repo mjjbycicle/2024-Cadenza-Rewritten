@@ -24,4 +24,8 @@ public class Hopper extends SubsystemBase {
   public void outtake() {
     hopperIO.set(-IntakeInfo.hopperSpeed);
   }
+
+  public void stop() {
+    hopperIO.stop();
+  }
 }

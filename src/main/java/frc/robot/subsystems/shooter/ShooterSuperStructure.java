@@ -49,4 +49,8 @@ public class ShooterSuperStructure extends SubsystemBase {
     shooter.setTargetSpeed(currentSetpoint.speed());
     pivot.setAngle(currentSetpoint.angle());
   }
+
+  public boolean ready() {
+    return shooter.isReady();
+  }
 }
