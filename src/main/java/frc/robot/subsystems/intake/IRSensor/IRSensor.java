@@ -8,7 +8,6 @@ import math.Averager;
 
 public class IRSensor extends SubsystemBase {
   private final DigitalInput sensor1;
-  private final DigitalInput sensor2;
   private boolean active = true;
 
   // 0 = clear, 1 = has note
@@ -16,7 +15,6 @@ public class IRSensor extends SubsystemBase {
 
   public IRSensor() {
     sensor1 = new DigitalInput(IntakeIDs.IR1);
-    sensor2 = new DigitalInput(IntakeIDs.IR2);
   }
 
   public boolean rawSensorIsClear() {

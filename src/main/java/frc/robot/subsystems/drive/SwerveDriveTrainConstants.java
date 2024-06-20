@@ -1,4 +1,4 @@
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems.drive;
 
 public class SwerveDriveTrainConstants {
   /** CAN ID of the Pigeon2 on the drivetrain */

@@ -1,4 +1,6 @@
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems.drive;
+
+import static frc.robot.constants.RobotInfo.DriveInfo.DriveMode;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.Utils;
@@ -8,17 +10,14 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.FieldConstants;
+import frc.robot.constants.RobotInfo.DriveInfo.DriveMode;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
   private final int ModuleCount;
@@ -33,12 +32,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   private final Field2d field;
   private final PIDController turnPid;
   private final Notifier telemetry;
-  private DriveState state;
-
-  public enum DriveState{
-    MANUAL,
-    SPEAKER_LOCK
-  }
+  private DriveMode state;
 
   /* Put smartdashboard calls in separate thread to reduce performance impact */
   private void telemeterize() {
@@ -157,7 +151,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     telemetry = new Notifier(this::telemeterize);
     telemetry.startPeriodic(0.1); // Telemeterize every 100ms
 
-    state = DriveState.MANUAL;
+    state = DriveMode.MANUAL_DRIVE;
   }
 
   private SwerveModulePosition[] getSwervePositions() {
@@ -219,19 +213,44 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     switch (state) {
-      case MANUAL:
+      case MANUAL_DRIVE:
         MovementUtil.reset();
-      case SPEAKER_LOCK:
+      case LOCK_TO_SPEAKER:
         if (DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-          MovementUtil.setLocked(FieldConstants.speakerPose_blue);
+          MovementUtil.setLocked(FieldConstants.speaker_blue);
         } else {
-          MovementUtil.setLocked(FieldConstants.speakerPose_red);
+          MovementUtil.setLocked(FieldConstants.speaker_red);
+        }
+      case LOCK_TO_AMP:
+        if (DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+          MovementUtil.setLocked(FieldConstants.amp_blue.getTranslation());
+        } else {
+          MovementUtil.setLocked(FieldConstants.amp_red.getTranslation());
+        }
+      case DRIVE_TO_AMP:
+        if (DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+          MovementUtil.setToDesired(FieldConstants.amp_blue.getTranslation());
+          MovementUtil.setLocked(Rotation2d.fromDegrees(90));
+        } else {
+          MovementUtil.setToDesired(FieldConstants.amp_red.getTranslation());
+          MovementUtil.setLocked(Rotation2d.fromDegrees(270));
+        }
+      case DRIVE_TO_SPEAKER:
+        if (DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+          MovementUtil.setToDesired(FieldConstants.manualSpeaker_blue.getTranslation());
+          MovementUtil.setLocked(Rotation2d.fromDegrees(0));
+        } else {
+          MovementUtil.setToDesired(FieldConstants.manualSpeaker_red.getTranslation());
+          MovementUtil.setLocked(Rotation2d.fromDegrees(0));
         }
     }
   }
 
-  public void setState(DriveState state){
+  public void setDriveMode(DriveMode state) {
     this.state = state;
   }
 }
