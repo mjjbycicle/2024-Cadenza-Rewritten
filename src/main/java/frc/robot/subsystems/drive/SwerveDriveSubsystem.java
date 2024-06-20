@@ -1,7 +1,5 @@
 package frc.robot.subsystems.drive;
 
-import static frc.robot.constants.RobotInfo.DriveInfo.DriveMode;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -33,6 +31,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   private final PIDController turnPid;
   private final Notifier telemetry;
   private DriveMode state;
+  private MovementUtil movementUtil;
 
   /* Put smartdashboard calls in separate thread to reduce performance impact */
   private void telemeterize() {
@@ -152,6 +151,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     telemetry.startPeriodic(0.1); // Telemeterize every 100ms
 
     state = DriveMode.MANUAL_DRIVE;
+    
+    movementUtil = new MovementUtil(new Translation2d(), new Translation2d(), new Rotation2d(), false, false, false);
   }
 
   private SwerveModulePosition[] getSwervePositions() {
@@ -214,38 +215,37 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   public void periodic() {
     switch (state) {
       case MANUAL_DRIVE:
-        MovementUtil.reset();
+        movementUtil.reset();
       case LOCK_TO_SPEAKER:
         if (DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-          MovementUtil.setLocked(FieldConstants.speaker_blue);
+          movementUtil.setLocked(FieldConstants.speaker_blue);
         } else {
-          MovementUtil.setLocked(FieldConstants.speaker_red);
+          movementUtil.setLocked(FieldConstants.speaker_red);
         }
       case LOCK_TO_AMP:
         if (DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-          MovementUtil.setLocked(FieldConstants.amp_blue.getTranslation());
+          movementUtil.setLocked(FieldConstants.amp_blue.getTranslation());
         } else {
-          MovementUtil.setLocked(FieldConstants.amp_red.getTranslation());
+          movementUtil.setLocked(FieldConstants.amp_red.getTranslation());
         }
       case DRIVE_TO_AMP:
         if (DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-          MovementUtil.setToDesired(FieldConstants.amp_blue.getTranslation());
-          MovementUtil.setLocked(Rotation2d.fromDegrees(90));
+          movementUtil.setToDesired(FieldConstants.amp_blue.getTranslation());
+          movementUtil.setLocked(Rotation2d.fromDegrees(90));
         } else {
-          MovementUtil.setToDesired(FieldConstants.amp_red.getTranslation());
-          MovementUtil.setLocked(Rotation2d.fromDegrees(270));
+          movementUtil.setToDesired(FieldConstants.amp_red.getTranslation());
+          movementUtil.setLocked(Rotation2d.fromDegrees(270));
         }
       case DRIVE_TO_SPEAKER:
+        movementUtil.setLocked(Rotation2d.fromDegrees(0));
         if (DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-          MovementUtil.setToDesired(FieldConstants.manualSpeaker_blue.getTranslation());
-          MovementUtil.setLocked(Rotation2d.fromDegrees(0));
+          movementUtil.setToDesired(FieldConstants.manualSpeaker_blue.getTranslation());
         } else {
-          MovementUtil.setToDesired(FieldConstants.manualSpeaker_red.getTranslation());
-          MovementUtil.setLocked(Rotation2d.fromDegrees(0));
+          movementUtil.setToDesired(FieldConstants.manualSpeaker_red.getTranslation());
         }
     }
   }
