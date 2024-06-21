@@ -36,7 +36,6 @@ public class Module {
   private final PIDController turnFeedback;
   private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
-  private Rotation2d turnRelativeOffset = null; // Relative + Offset = Absolute
   private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
   public Module(ModuleIO io, int index) {
@@ -65,7 +64,8 @@ public class Module {
     }
 
     turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
-    setBrakeMode(true);
+
+    setBrakeMode();
   }
 
   /**
@@ -78,12 +78,6 @@ public class Module {
 
   public void periodic() {
     Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
-
-    // On first cycle, reset relative turn encoder
-    // Wait until absolute angle is nonzero in case it wasn't initialized yet
-    if (turnRelativeOffset == null && inputs.turnAbsolutePosition.getRadians() != 0.0) {
-      turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
-    }
 
     // Run closed loop turn control
     if (angleSetpoint != null) {
@@ -114,8 +108,7 @@ public class Module {
     for (int i = 0; i < sampleCount; i++) {
       double positionMeters = inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
       Rotation2d angle =
-          inputs.odometryTurnPositions[i].plus(
-              turnRelativeOffset != null ? turnRelativeOffset : new Rotation2d());
+          inputs.odometryTurnPositions[i];
       odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
     }
   }
@@ -154,18 +147,14 @@ public class Module {
   }
 
   /** Sets whether brake mode is enabled. */
-  public void setBrakeMode(boolean enabled) {
-    io.setDriveBrakeMode(enabled);
-    io.setTurnBrakeMode(enabled);
+  public void setBrakeMode() {
+    io.setDriveBrakeMode(false);
+    io.setTurnBrakeMode(true);
   }
 
   /** Returns the current turn angle of the module. */
   public Rotation2d getAngle() {
-    if (turnRelativeOffset == null) {
-      return new Rotation2d();
-    } else {
-      return inputs.turnPosition.plus(turnRelativeOffset);
-    }
+    return inputs.turnAbsolutePosition;
   }
 
   /** Returns the current drive position of the module in meters. */

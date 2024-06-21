@@ -26,102 +26,85 @@ import frc.robot.subsystems.shooter.shooter.ShooterIOTalonFX;
 import frc.robot.util.MovementUtil;
 
 public class SubsystemManager {
-    private static NavX navx;
-    private static Drive drive;
-    private static OI oi;
-    private static MovementUtil movementUtil;
-    private static ShooterSuperStructure shooter;
-    private static IntakeSuperstructure intake;
+  private static NavX navx;
+  private static Drive drive;
+  private static OI oi;
+  private static MovementUtil movementUtil;
+  private static ShooterSuperStructure shooter;
+  private static IntakeSuperstructure intake;
 
-    public static Drive getDrive() {
-        MovementUtil.configure(
-                new Translation2d(),
-                new Translation2d(),
-                new Rotation2d(),
-                false,
-                false,
-                false
-        );
-        if (drive == null) {
-            switch (currentMode) {
-                case REAL:
-                    drive =
-                            new Drive(
-                                    new GyroIONavX2(),
-                                    new ModuleIOTalonFX(0),
-                                    new ModuleIOTalonFX(1),
-                                    new ModuleIOTalonFX(2),
-                                    new ModuleIOTalonFX(3));
-                    break;
+  public static Drive getDrive() {
+    MovementUtil.configure(
+        new Translation2d(), new Translation2d(), new Rotation2d(), false, false, false);
+    if (drive == null) {
+      switch (currentMode) {
+        case REAL:
+          drive =
+              new Drive(
+                  new GyroIONavX2(),
+                  new ModuleIOTalonFX(0),
+                  new ModuleIOTalonFX(1),
+                  new ModuleIOTalonFX(2),
+                  new ModuleIOTalonFX(3));
+          break;
 
-                case SIM:
-                    drive =
-                            new Drive(
-                                    new GyroIO() {
-                                    },
-                                    new ModuleIOSim(),
-                                    new ModuleIOSim(),
-                                    new ModuleIOSim(),
-                                    new ModuleIOSim());
-                    break;
+        case SIM:
+          drive =
+              new Drive(
+                  new GyroIO() {},
+                  new ModuleIOSim(),
+                  new ModuleIOSim(),
+                  new ModuleIOSim(),
+                  new ModuleIOSim());
+          break;
 
-                default:
-                    drive =
-                            new Drive(
-                                    new GyroIO() {
-                                    },
-                                    new ModuleIO() {
-                                    },
-                                    new ModuleIO() {
-                                    },
-                                    new ModuleIO() {
-                                    },
-                                    new ModuleIO() {
-                                    });
-                    break;
-            }
-        }
-        return drive;
+        default:
+          drive =
+              new Drive(
+                  new GyroIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {});
+          break;
+      }
     }
+    return drive;
+  }
 
-    public static NavX getNavX() {
-        if (navx == null) {
-            navx = new NavX();
-        }
-        return navx;
+  public static NavX getNavX() {
+    if (navx == null) {
+      navx = new NavX();
     }
+    return navx;
+  }
 
-    public static OI getOI() {
-        if (oi == null) {
-            oi = new OI();
-        }
-        return oi;
+  public static OI getOI() {
+    if (oi == null) {
+      oi = new OI();
     }
+    return oi;
+  }
 
-    public static ShooterSuperStructure getShooter() {
-        if (shooter == null) {
-            shooter =
-                    new ShooterSuperStructure(
-                            new Shooter(new ShooterIOTalonFX()),
-                            new Pivot(new PivotIOSparkMax()),
-                            getDrive().getPose());
-        }
-        return shooter;
+  public static ShooterSuperStructure getShooter() {
+    if (shooter == null) {
+      shooter =
+          new ShooterSuperStructure(
+              new Shooter(new ShooterIOTalonFX()),
+              new Pivot(new PivotIOSparkMax()),
+              getDrive().getPose());
     }
+    return shooter;
+  }
 
-    public static IntakeSuperstructure getIntake() {
-        if (intake == null) {
-            intake =
-                    new IntakeSuperstructure(
-                            new Hopper(
-                                    new HopperIOSparkMax()
-                            ),
-                            new Intake(
-                                    new IntakeIOSparkMax()
-                            ),
-                            new IRSensor()
-                    );
-        }
-        return intake;
+  public static IntakeSuperstructure getIntake() {
+    if (intake == null) {
+      intake =
+          new IntakeSuperstructure(
+              new Hopper(new HopperIOSparkMax()),
+              new Intake(new IntakeIOSparkMax()),
+              new IRSensor());
     }
+    return intake;
+  }
 }

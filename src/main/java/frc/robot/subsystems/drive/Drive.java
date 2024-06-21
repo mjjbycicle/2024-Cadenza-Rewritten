@@ -80,7 +80,7 @@ public class Drive extends SubsystemBase {
   private DriveMode driveMode;
   private final Pose2d amp, manualSpeaker;
   private final Translation2d speaker;
-  
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -139,7 +139,7 @@ public class Drive extends SubsystemBase {
                 },
                 null,
                 this));
-    
+
     driveMode = DriveMode.MANUAL_DRIVE;
     if (DriverStationUtil.isRed()) {
       amp = amp_red;
@@ -252,7 +252,7 @@ public class Drive extends SubsystemBase {
     runVelocity(MovementUtil.getRobotRelative(getPose()));
   }
 
-  /** Stops the  */
+  /** Stops the */
   public void stop() {
     runVelocity(new ChassisSpeeds());
   }
@@ -389,7 +389,7 @@ public class Drive extends SubsystemBase {
     setToDesired(targetPose.getTranslation());
   }
 
-  public void setDriveMode(DriveMode mode){
+  public void setDriveMode(DriveMode mode) {
     this.driveMode = mode;
   }
 }

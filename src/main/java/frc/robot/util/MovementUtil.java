@@ -21,12 +21,12 @@ public class MovementUtil {
   private static final PIDController movementYPID = new PIDController(0.5, 0, 0);
 
   public static void configure(
-          Translation2d desiredPose,
-          Translation2d targetLock,
-          Rotation2d desiredRotation,
-          boolean toDesired,
-          boolean locked,
-          boolean useRotation) {
+      Translation2d desiredPose,
+      Translation2d targetLock,
+      Rotation2d desiredRotation,
+      boolean toDesired,
+      boolean locked,
+      boolean useRotation) {
     MovementUtil.desiredPose = desiredPose;
     MovementUtil.targetLock = targetLock;
     MovementUtil.desiredRotation = desiredRotation;

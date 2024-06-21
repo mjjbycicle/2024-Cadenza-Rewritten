@@ -19,10 +19,10 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.Controls;
 import frc.robot.oi.OI;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.SubsystemManager;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -48,6 +48,8 @@ public class RobotContainer {
         superstructure = new Superstructure();
         oi = SubsystemManager.getOI();
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+        autoChooser.addOption("sysID drive dynamic", getDrive().sysIdDynamic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption("sysID drive quasistatic", getDrive().sysIdQuasistatic(SysIdRoutine.Direction.kForward));
         configureButtonBindings();
     }
 
@@ -58,31 +60,75 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        oi.operatorController().getButton(Controls.OperatorControls.IntakeExtendButton).onTrue(superstructure.extendIntakeCommand());
-        oi.operatorController().getButton(Controls.OperatorControls.IntakeRetractButton).onTrue(superstructure.retractIntakeCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.IntakeExtendButton)
+                .onTrue(superstructure.extendIntakeCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.IntakeRetractButton)
+                .onTrue(superstructure.retractIntakeCommand());
 
-        oi.driverController().getButton(Controls.DriverControls.AimButton).whileTrue(superstructure.movingSpeakerCommand());
-        oi.driverController().getButton(Controls.DriverControls.AimButton).onFalse(superstructure.manualDriveCommand());
+        oi.driverController()
+                .getButton(Controls.DriverControls.AimButton)
+                .whileTrue(superstructure.movingSpeakerCommand());
+        oi.driverController()
+                .getButton(Controls.DriverControls.AimButton)
+                .onFalse(superstructure.manualDriveCommand());
 
-        oi.operatorController().getButton(Controls.OperatorControls.IntakeButton).whileTrue(superstructure.intakeCommand());
-        oi.operatorController().getButton(Controls.OperatorControls.IntakeButton).onFalse(superstructure.manualDriveCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.IntakeButton)
+                .whileTrue(superstructure.intakeCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.IntakeButton)
+                .onFalse(superstructure.manualDriveCommand());
 
-        oi.operatorController().getButton(Controls.OperatorControls.OuttakeButton).whileTrue(superstructure.outtakeCommand());
-        oi.operatorController().getButton(Controls.OperatorControls.OuttakeButton).onFalse(superstructure.manualDriveCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.OuttakeButton)
+                .whileTrue(superstructure.outtakeCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.OuttakeButton)
+                .onFalse(superstructure.manualDriveCommand());
 
-        oi.operatorController().getButton(Controls.OperatorControls.LaunchShooterButton).whileTrue(superstructure.launchSpinupCommand());
-        oi.operatorController().getButton(Controls.OperatorControls.LaunchShooterButton).onFalse(superstructure.manualDriveCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.LaunchShooterButton)
+                .whileTrue(superstructure.launchSpinupCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.LaunchShooterButton)
+                .onFalse(superstructure.manualDriveCommand());
 
-        oi.operatorController().getButton(Controls.OperatorControls.FeedShooterButton).whileTrue(superstructure.autoLaunchCommand());
-        oi.operatorController().getButton(Controls.OperatorControls.FeedShooterButton).onFalse(superstructure.manualSpeakerCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.FeedShooterButton)
+                .whileTrue(superstructure.autoLaunchCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.FeedShooterButton)
+                .onFalse(superstructure.manualSpeakerCommand());
 
-        oi.operatorController().getButton(Controls.OperatorControls.ManualShooterButton).whileTrue(superstructure.manualSpeakerCommand());
-        oi.operatorController().getButton(Controls.OperatorControls.ManualShooterButton).onFalse(superstructure.manualDriveCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.ManualShooterButton)
+                .whileTrue(superstructure.manualSpeakerCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.ManualShooterButton)
+                .onFalse(superstructure.manualDriveCommand());
 
-        oi.driverController().getButton(Controls.DriverControls.AmpAlignButton).whileTrue(superstructure.autoAmpCommand());
-        oi.driverController().getButton(Controls.DriverControls.AmpAlignButton).onFalse(superstructure.manualDriveCommand());
+        oi.driverController()
+                .getButton(Controls.DriverControls.AmpAlignButton)
+                .whileTrue(superstructure.autoAmpCommand());
+        oi.driverController()
+                .getButton(Controls.DriverControls.AmpAlignButton)
+                .onFalse(superstructure.manualDriveCommand());
 
-        oi.operatorController().getButton(Controls.OperatorControls.ToggleIR).onTrue(superstructure.toggleIRCommand());
+        oi.operatorController()
+                .getButton(Controls.OperatorControls.ToggleIR)
+                .onTrue(superstructure.toggleIRCommand());
+
+        oi.driverController()
+                .getButton(Controls.DriverControls.ResetNavXButtons[0])
+                .onTrue(new RunCommand(
+                        () -> {
+                            if (oi.driverController().getButton(Controls.DriverControls.ResetNavXButtons[1]).getAsBoolean()) {
+                                getNavX().reset();
+                            }
+                        }
+                ));
     }
 
     /**
