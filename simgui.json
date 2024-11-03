@@ -3,6 +3,7 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Drive/Field": "Field2d",
+      "/SmartDashboard/Shooter Pivot": "Mechanism2d",
       "/SmartDashboard/Shooter/Mech": "Mechanism2d",
       "/SmartDashboard/arm mech": "Mechanism2d"
     },
@@ -14,6 +15,11 @@
         "right": 2961,
         "top": 79,
         "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Shooter Pivot": {
         "window": {
           "visible": true
         }

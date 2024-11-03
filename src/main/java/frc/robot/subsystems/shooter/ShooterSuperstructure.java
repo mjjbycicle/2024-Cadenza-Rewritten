@@ -65,7 +65,7 @@ public class ShooterSuperstructure extends SubsystemBase {
 
     public static double getShooterRotation(double shooterDist) {
         double percent = getShooterPercent(shooterDist);
-        return percent / 6 + 1/12.0;
+        return percent / 6 + 1 / 24.0;
     }
 
     public static double getShooterRadians(double shooterDist) {
@@ -75,6 +75,7 @@ public class ShooterSuperstructure extends SubsystemBase {
     @Override
     public void periodic() {
         shooterArm.setAngle(Units.radiansToDegrees(pivot.getCurrentAngle()));
+        SmartDashboard.putData("Shooter Pivot", shooterMech);
     }
 
     @Override

@@ -5,6 +5,8 @@ import frc.lib.TunableNumber;
 public class ShooterPIDs {
     public static final TunableNumber SHOOTER_SHOOTER_kP
             = new TunableNumber("Shooter Shooter kP");
+    public static final TunableNumber SHOOTER_SHOOTER_kV
+            = new TunableNumber("Shooter Shooter kV");
     public static final TunableNumber SHOOTER_SHOOTER_ACCELERATION
             = new TunableNumber("Shooter Shooter Acceleration");
     public static final TunableNumber SHOOTER_SHOOTER_JERK
@@ -26,8 +28,9 @@ public class ShooterPIDs {
         SHOOTER_PIVOT_kD.setDefault(1);
         SHOOTER_PIVOT_VELOCITY.setDefault(10);
         SHOOTER_PIVOT_ACCELERATION.setDefault(10);
-        SHOOTER_SHOOTER_ACCELERATION.setDefault(3);
-        SHOOTER_SHOOTER_JERK.setDefault(3);
-        SHOOTER_PIVOT_kP.setDefault(0.0021693);
+        SHOOTER_SHOOTER_ACCELERATION.setDefault(0.1);
+        SHOOTER_SHOOTER_JERK.setDefault(0.05);
+        SHOOTER_SHOOTER_kP.setDefault(0.1);
+        SHOOTER_SHOOTER_kV.setDefault(0.1);
     }
 }

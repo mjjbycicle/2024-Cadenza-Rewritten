@@ -28,9 +28,12 @@ public class RobotContainer {
 
     private void configureBindings() {
         swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
-        shooter.setDefaultCommand(shooter.setShootingMode(ShootingMode.AUTO));
+        shooter.setDefaultCommand(shooter.setShootingMode(ShootingMode.IDLE));
         Controls.DriverControls.SOTF.whileTrue(
-                swerve.SOTFCommand()
+                Commands.parallel(
+                        swerve.SOTFCommand(),
+                        shooter.setShootingMode(ShootingMode.AUTO)
+                )
         );
     }
 
