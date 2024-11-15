@@ -23,14 +23,14 @@ public class ShooterPIDs {
             = new TunableNumber("Shooter Pivot Acceleration");
 
     static {
-        SHOOTER_PIVOT_kP.setDefault(34);
+        SHOOTER_PIVOT_kP.setDefault(1);
         SHOOTER_PIVOT_kI.setDefault(0.0);
         SHOOTER_PIVOT_kD.setDefault(1);
         SHOOTER_PIVOT_VELOCITY.setDefault(10);
         SHOOTER_PIVOT_ACCELERATION.setDefault(10);
-        SHOOTER_SHOOTER_ACCELERATION.setDefault(0.1);
-        SHOOTER_SHOOTER_JERK.setDefault(0.05);
-        SHOOTER_SHOOTER_kP.setDefault(0.1);
-        SHOOTER_SHOOTER_kV.setDefault(0.1);
+        SHOOTER_SHOOTER_ACCELERATION.setDefault(1);
+        SHOOTER_SHOOTER_JERK.setDefault(1);
+        SHOOTER_SHOOTER_kP.setDefault(1);
+        SHOOTER_SHOOTER_kV.setDefault(0);
     }
 }

@@ -1,64 +1,68 @@
 package frc.robot.subsystems.shooter.shooter;
 
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.wpilibj2.command.Command;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.lib.TunableFeedforward;
 import frc.robot.subsystems.shooter.constants.ShooterConstants;
 import frc.robot.subsystems.shooter.constants.ShooterPIDs;
 import frc.robot.subsystems.shooter.constants.ShootingMode;
 import frc.lib.Helpers;
 
 public class ConcreteShooterSubsystem extends ShooterSubsystem {
-    private final TalonFX shooterLeft, shooterRight;
-    private final TalonFXConfiguration config;
+    private final CANSparkFlex shooterMotor;
+    private final ProfiledPIDController velocityPID;
+    private final TunableFeedforward velocityFF;
     private ShootingMode mode;
 
     public ConcreteShooterSubsystem() {
-        shooterLeft = new TalonFX(ShooterConstants.IDs.SHOOTER_SHOOTER_LEFT_MOTOR, "Canivore1");
-        shooterRight = new TalonFX(ShooterConstants.IDs.SHOOTER_SHOOTER_RIGHT_MOTOR, "Canivore1");
-        shooterLeft.setInverted(true);
-        var leftConfigurator = shooterLeft.getConfigurator();
-        var rightConfigurator = shooterRight.getConfigurator();
-        config = new TalonFXConfiguration()
-                .withSlot0(
-                        new Slot0Configs()
-                                .withKP(
-                                        ShooterPIDs.SHOOTER_SHOOTER_kP.get()
-                                )
+        shooterMotor = new CANSparkFlex(
+                ShooterConstants.IDs.SHOOTER_SHOOTER_MOTOR,
+                CANSparkLowLevel.MotorType.kBrushless
+        );
+//        shooterMotor.restoreFactoryDefaults();
+        shooterMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+        shooterMotor.setInverted(false);
+        shooterMotor.setSmartCurrentLimit(50);
+        velocityPID = new ProfiledPIDController(
+                ShooterPIDs.SHOOTER_SHOOTER_kP.get(),
+                0,0,
+                new TrapezoidProfile.Constraints(
+                        ShooterPIDs.SHOOTER_SHOOTER_ACCELERATION.get(),
+                        ShooterPIDs.SHOOTER_SHOOTER_JERK.get()
                 )
-                .withMotionMagic(
-                        new MotionMagicConfigs()
-                                .withMotionMagicAcceleration(
-                                        ShooterPIDs.SHOOTER_SHOOTER_ACCELERATION.get()
-                                )
-                                .withMotionMagicJerk(
-                                        ShooterPIDs.SHOOTER_SHOOTER_JERK.get()
-                                )
-
-                );
-        leftConfigurator.apply(config);
-        rightConfigurator.apply(config);
-        shooterRight.setControl(new Follower(shooterLeft.getDeviceID(), true));
+        );
+        velocityFF = new TunableFeedforward(
+                0,
+                ShooterPIDs.SHOOTER_SHOOTER_kV.get(),
+                0
+        );
         mode = ShootingMode.IDLE;
     }
 
-    private void setSpeed(double speed) {
-        shooterLeft.setControl(new MotionMagicVelocityVoltage(speed));
+    private void runSpeed() {
+        double pidOutput =
+                velocityPID.getGoal().position;
+//                velocityPID.calculate(getCurrentSpeed())
+//                + velocityFF.calculate(getCurrentSpeed());
+        SmartDashboard.putNumber("shooter output", pidOutput);
+        SmartDashboard.putNumber("target shooter speed", getSpeed(mode));
+        shooterMotor.set(pidOutput);
     }
 
     @Override
     public void setShootingMode(ShootingMode mode) {
         this.mode = mode;
+        velocityPID.setGoal(getSpeed(mode));
     }
 
     @Override
     protected boolean atSpeedSetpoint() {
         return Helpers.withinTolerance(
-                shooterLeft.getVelocity().getValueAsDouble(),
+                getCurrentSpeed(),
                 getSpeed(mode),
                 ShooterConstants.SHOOTER_SPEED_ERROR
         );
@@ -66,34 +70,29 @@ public class ConcreteShooterSubsystem extends ShooterSubsystem {
 
     @Override
     public void periodic() {
-        setSpeed(getSpeed(mode));
+        runSpeed();
         updateTunables();
     }
 
     @Override
     public double getCurrentSpeed() {
-        return shooterLeft.getVelocity().getValueAsDouble();
+        return shooterMotor.getEncoder().getVelocity();
     }
 
     private void updateTunables() {
-        config
-                .withSlot0(
-                        new Slot0Configs()
-                                .withKP(
-                                        ShooterPIDs.SHOOTER_SHOOTER_kP.get()
-                                )
+        velocityPID.setPID(
+                ShooterPIDs.SHOOTER_SHOOTER_kP.get(),
+                0, 0
+        );
+        velocityPID.setConstraints(
+                new TrapezoidProfile.Constraints(
+                        ShooterPIDs.SHOOTER_SHOOTER_ACCELERATION.get(),
+                        ShooterPIDs.SHOOTER_SHOOTER_JERK.get()
                 )
-                .withMotionMagic(
-                        new MotionMagicConfigs()
-                                .withMotionMagicAcceleration(
-                                        ShooterPIDs.SHOOTER_SHOOTER_ACCELERATION.get()
-                                )
-                                .withMotionMagicJerk(
-                                        ShooterPIDs.SHOOTER_SHOOTER_JERK.get()
-                                )
-                );
-        shooterLeft.getConfigurator().apply(config);
-        shooterRight.getConfigurator().apply(config);
+        );
+        velocityFF.setKv(
+                ShooterPIDs.SHOOTER_SHOOTER_kV.get()
+        );
     }
 
     @Override

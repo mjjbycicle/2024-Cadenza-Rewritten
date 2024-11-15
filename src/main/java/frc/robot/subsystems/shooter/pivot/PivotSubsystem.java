@@ -16,8 +16,9 @@ public abstract class PivotSubsystem extends SubsystemBase {
 
     public static PivotSubsystem getInstance() {
         if (instance == null) {
-            if (Robot.isReal()) instance = new ConcretePivotSubsystem();
-            else instance = new SimPivotSubsystem();
+//            if (Robot.isReal()) instance = new ConcretePivotSubsystem();
+//            else
+                instance = new SimPivotSubsystem();
         }
         return instance;
     }

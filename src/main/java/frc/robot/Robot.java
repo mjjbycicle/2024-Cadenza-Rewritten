@@ -31,7 +31,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     SmartDashboard.putBoolean("auton?", isAuton);
 
-    robotContainer.sendSubsystemData();
+    robotContainer.sendSubsystems();
   }
 
   @Override

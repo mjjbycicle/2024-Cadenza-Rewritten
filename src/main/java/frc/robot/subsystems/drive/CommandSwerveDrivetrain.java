@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CommandsUtil;
 import frc.lib.DriverStationUtil;
 import frc.lib.LimelightHelpers;
@@ -280,28 +281,32 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return TunerConstants.DriveTrain;
     }
 
-    private boolean inShootingRangeSupplier() {
-        return AimUtil.getSpeakerDist() <= 5;
+    public Trigger inShootingRange() {
+        return new Trigger(() -> AimUtil.getSpeakerDist() <= 5);
     }
 
-    private boolean inShootingSectorSupplier() {
-        Rotation2d rotation = AimUtil.getSpeakerRotation();
-        return Math.abs(rotation.getDegrees()) <= 35;
+    public Trigger inShootingSector() {
+        return new Trigger(() -> {
+            Rotation2d rotation = AimUtil.getSpeakerRotation();
+            return Math.abs(rotation.getDegrees()) <= 35;
+        });
     }
 
-    private boolean isAlignedSupplier() {
-        if (!Robot.isInAuton()) {
-            return SOTFRequest.HeadingController.atSetpoint();
-        } else {
-            return Math.abs(AimUtil.getSpeakerOffset().getDegrees()) <= 5;
-        }
+    public Trigger isAligned() {
+        return new Trigger(() -> {
+            if (!Robot.isInAuton()) {
+                return SOTFRequest.HeadingController.atSetpoint();
+            } else {
+                return Math.abs(AimUtil.getSpeakerOffset().getDegrees()) <= 5;
+            }
+        });
     }
 
-    private boolean inSpinupRangeSupplier() {
-        return AimUtil.getSpeakerDist() <= 4;
+    public Trigger inSpinupRange() {
+        return new Trigger(() -> AimUtil.getSpeakerDist() <= 4);
     }
 
-    private boolean inLaunchRangeSupplier() {
-        return AimUtil.getSpeakerVector().getX() <= 10.6934;
+    public Trigger inLaunchRange() {
+        return new Trigger(() -> AimUtil.getSpeakerVector().getX() <= 10.6934);
     }
 }

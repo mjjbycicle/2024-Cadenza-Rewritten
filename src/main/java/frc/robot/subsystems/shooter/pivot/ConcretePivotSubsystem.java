@@ -39,10 +39,10 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
         mode = ShootingMode.IDLE;
     }
 
-    private void setAngle(double angle) {
+    private void runAngle(double angle) {
         pivotPID.setGoal(angle);
         double pidOutput = pivotPID.calculate(angle);
-        pivotLeft.set(pidOutput);
+//        pivotLeft.set(pidOutput);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ConcretePivotSubsystem extends PivotSubsystem {
 
     @Override
     public void periodic() {
-        setAngle(getAngle(mode));
+        runAngle(getAngle(mode));
         updateTunables();
     }
 

@@ -1,48 +1,144 @@
 // Copyright (c) FIRST and other WPILib contributors.
+
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.constants.Controls;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.commands.CommandFactory;
+import frc.robot.constants.Controls.DriverControls;
+import frc.robot.constants.Controls.OperatorControls;
 import frc.robot.constants.InterpolatingTables;
+import frc.robot.oi.OI;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
-import frc.robot.subsystems.drive.constants.TunerConstants;
+import frc.robot.subsystems.indexer.IndexerSuperstructure;
+import frc.robot.subsystems.indexer.constants.IndexerState;
 import frc.robot.subsystems.shooter.ShooterSuperstructure;
 import frc.robot.subsystems.shooter.constants.ShootingMode;
-import frc.robot.subsystems.shooter.shooter.ShooterSubsystem;
+import frc.robot.util.AimUtil;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class RobotContainer {
-    private final CommandSwerveDrivetrain swerve;
+    public static OI oi;
+    private final CommandSwerveDrivetrain swerveDriveSubsystem;
     private final ShooterSuperstructure shooter;
+    private final IndexerSuperstructure indexer;
+    private final SendableChooser<Command> autos;
+
 
     public RobotContainer() {
-        swerve = TunerConstants.DriveTrain;
-        shooter = ShooterSuperstructure.getInstance();
         InterpolatingTables.initializeTables();
+
+        swerveDriveSubsystem = CommandSwerveDrivetrain.getInstance();
+        shooter = ShooterSuperstructure.getInstance();
+        indexer = IndexerSuperstructure.getInstance();
+
+        autos = new SendableChooser<>();
+        autos.setDefaultOption("null auto", new WaitCommand(1));
+
+        SmartDashboard.putData("Autons", autos);
+
         configureBindings();
     }
 
     private void configureBindings() {
-        swerve.setDefaultCommand(swerve.driveFieldCentricCommand());
-        shooter.setDefaultCommand(shooter.setShootingMode(ShootingMode.IDLE));
-        Controls.DriverControls.SOTF.whileTrue(
-                Commands.parallel(
-                        swerve.SOTFCommand(),
-                        shooter.setShootingMode(ShootingMode.AUTO)
-                )
+        swerveDriveSubsystem.setDefaultCommand(
+                swerveDriveSubsystem.driveFieldCentricCommand()
         );
+
+        DriverControls.SOTF.and(indexer.hopperHasNote())
+                .whileTrue(
+                        Commands.parallel(
+                                swerveDriveSubsystem.SOTFCommand(),
+                                Commands.sequence(
+                                        Commands.waitUntil(
+                                                swerveDriveSubsystem.inShootingRange()
+                                        ),
+                                        Commands.parallel(
+                                                Commands.waitUntil(
+                                                        swerveDriveSubsystem.isAligned()
+                                                                .and(swerveDriveSubsystem.inShootingSector())
+                                                                .and(swerveDriveSubsystem.inShootingRange())
+                                                ),
+                                                shooter.setShootingMode(ShootingMode.SPINUP)
+                                        ),
+                                        CommandFactory.autoShootCommand()
+                                )
+                        )
+                ).onFalse(
+                        Commands.parallel(
+                                indexer.setIndexerStateCommand(IndexerState.IDLE),
+                                shooter.setShootingMode(ShootingMode.IDLE)
+                        )
+                );
+
+        DriverControls.AimButton
+                .whileTrue(
+                        Commands.sequence(
+                                swerveDriveSubsystem.pathfindCommand(
+                                        AimUtil.getManualSpeakerPose()
+                                ),
+                                CommandFactory.autoShootCommand()
+                        )
+                );
+
+        OperatorControls.IntakeButton
+                .whileTrue(
+                        indexer.setIndexerStateCommand(IndexerState.INTAKING)
+                )
+                .onFalse(
+                        indexer.setIndexerStateCommand(IndexerState.EXTENDED)
+                );
+
+        OperatorControls.IntakeRetractButton
+                .onTrue(
+                        indexer.setIndexerStateCommand(IndexerState.IDLE)
+                );
+
+        OperatorControls.IntakeExtendButton
+                .onTrue(
+                        indexer.setIndexerStateCommand(IndexerState.EXTENDED)
+                );
+
+        OperatorControls.OuttakeButton
+                .whileTrue(
+                        indexer.setIndexerStateCommand(IndexerState.OUTTAKING)
+                )
+                .onFalse(
+                        indexer.setIndexerStateCommand(IndexerState.IDLE)
+                );
+
+        OperatorControls.RunSpeakerShooterButton.and(indexer.hopperHasNote())
+                .whileTrue(
+                        CommandFactory.autoShootCommand()
+                );
+
+        OperatorControls.ManualShooterButton
+                .whileTrue(
+                        Commands.parallel(
+                                shooter.setShootingMode(ShootingMode.MANUAL),
+                                indexer.setIndexerStateCommand(IndexerState.FEED)
+                        )
+                )
+                .onFalse(
+                        Commands.parallel(
+                                indexer.setIndexerStateCommand(IndexerState.IDLE),
+                                shooter.setShootingMode(ShootingMode.IDLE)
+                        )
+                );
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        return autos.getSelected();
     }
 
-    public void sendSubsystemData() {
-        SmartDashboard.putData(swerve);
-        SmartDashboard.putData(shooter);
+    public void sendSubsystems() {
+        SmartDashboard.putData(swerveDriveSubsystem);
+        SmartDashboard.putData(indexer);
     }
 }

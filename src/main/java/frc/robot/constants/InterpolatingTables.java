@@ -15,13 +15,13 @@ public class InterpolatingTables {
 
     shots =
         new double[][] {
-          {1.2, 24.25, ShooterConstants.ShooterLowerOffset - 0.095},
-          {2.1, 26.5, ShooterConstants.ShooterLowerOffset - 0.048},
-          {2.6, 30, ShooterConstants.ShooterLowerOffset - 0.0325},
-          {3.1, 34.5, ShooterConstants.ShooterLowerOffset - 0.02},
-          {4.0, 55.75, ShooterConstants.ShooterLowerOffset - 0.01},
-          {4.1, 56.5, ShooterConstants.ShooterLowerOffset - 0.005},
-          {4.3, 58.5, ShooterConstants.ShooterLowerOffset}
+          {1.2, 0.5, ShooterConstants.ShooterLowerOffset - 0.095},
+          {2.1, 0.5, ShooterConstants.ShooterLowerOffset - 0.048},
+          {2.6, 0.5, ShooterConstants.ShooterLowerOffset - 0.0325},
+          {3.1, 0.5, ShooterConstants.ShooterLowerOffset - 0.02},
+          {4.0, 0.5, ShooterConstants.ShooterLowerOffset - 0.01},
+          {4.1, 0.5, ShooterConstants.ShooterLowerOffset - 0.005},
+          {4.3, 0.5, ShooterConstants.ShooterLowerOffset}
         };
 
     for (double[] shot : shots) {
