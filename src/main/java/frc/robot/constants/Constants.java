@@ -1,19 +1,34 @@
 package frc.robot.constants;
 
-public class Constants {
-  public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.508;
+import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.Robot;
 
-  public enum Mode {
-    REAL,
-    SIM,
-    REPLAY
+public final class Constants {
+  public static final double DEADZONE_VALUE = 0.08;
+  public static final int POSE_WINDOW_LENGTH = 1;
+  public static final double INTAKE_PIVOT_UP_MULTIPLIER = 2;
+
+  public static boolean tempTuningMode = true;
+
+  static {
+    if (!Robot.isReal()) tempTuningMode = true;
   }
 
-  public static final Mode currentMode = Mode.REAL;
+  public static final boolean tuningMode = tempTuningMode;
 
-  public static final int windowLength = 1;
+  public enum CurrentRobot {
+    CADENZA,
+    SIM
+  }
 
-  public static final double FIELD_WIDTH_METERS = 16.5410515;
+  public static final CurrentRobot currentRobot = CurrentRobot.SIM;
 
-  public static final double LOOP_TIME = 0.020;
+  private static final double[] oldOffsets = {-54.98, -122.4, 74.44, 121.92};
+  private static final double[] newOffsets = {
+    Rotation2d.fromRotations(-0.119).getDegrees(),
+    Rotation2d.fromRotations(-0.07).getDegrees(),
+    Rotation2d.fromRotations(-0.265 + 0.5).getDegrees(),
+    Rotation2d.fromRotations(0.474).getDegrees(),
+  };
+  static final double[] swerveOffsets = newOffsets;
 }

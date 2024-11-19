@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.subsystems.DrivetrainSubsystem;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -109,7 +108,7 @@ public class CommandsUtil {
           rotationController.calculate(pose.getRotation().getRadians(), heading);
 
       if (rotationOverride != null) {
-        rotationFeedback = Helpers.cap(rotationFeedback, DrivetrainSubsystem.MAX_ANGULAR_RATE);
+        rotationFeedback = Helpers.cap(rotationFeedback, 1.5 * Math.PI);
       }
 
       return ChassisSpeeds.fromFieldRelativeSpeeds(
