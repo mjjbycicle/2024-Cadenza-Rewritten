@@ -1,46 +1,27 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import java.util.Optional;
+import org.littletonrobotics.junction.LoggedRobot;
 
-public class Robot extends TimedRobot {
-  public static final boolean DEFAULT_TAG_HEIGHT_AIM = false;
-  public static boolean TAG_HEIGHT_AIM = DEFAULT_TAG_HEIGHT_AIM;
-  public static double autoStartTime = -1;
-  private static boolean isAutonomous = false;
-
-  private static boolean blue = true;
+public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
+
   private RobotContainer m_robotContainer;
 
   @Override
   public void robotInit() {
     m_robotContainer = new RobotContainer();
-    m_robotContainer.drivetrain.getDaqThread().setThreadPriority(99);
-
-    // Query and cache the alliance
-    addPeriodic(
-        () -> {
-          Alliance a = m_robotContainer.allianceChooser.getSelected();
-          if (a != null) {
-            blue = a == Alliance.Blue;
-          } else {
-            Optional<Alliance> alliance = DriverStation.getAlliance();
-            blue = alliance.isEmpty() || alliance.get() == Alliance.Blue;
-          }
-        },
-        0.2);
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    m_robotContainer.periodic();
+    m_robotContainer.sendSubsystemData();
   }
 
   @Override
@@ -54,20 +35,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    autoStartTime = Timer.getFPGATimestamp();
-    Robot.TAG_HEIGHT_AIM = DEFAULT_TAG_HEIGHT_AIM;
-    Robot.isAutonomous = true;
-    RobotContainer.autoNotesScored.clear();
-    m_robotContainer.drivetrain.zeroGyroscope();
-    m_robotContainer.drivetrain.setMeasureStdDev(0.3, 0.3, 0.3);
-    m_robotContainer.vision.setDistanceOverride(null);
-    m_robotContainer.vision.setAllowVisionOdometry(false);
-    m_robotContainer.vision.setDirectTagAiming(true);
-    m_robotContainer.vision.setShootOnTheFly(false);
-    m_robotContainer.vision.setMegatag2Enabled(false);
-    m_robotContainer.vision.setAutoTagFilter();
-
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
@@ -81,16 +50,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    Robot.TAG_HEIGHT_AIM = DEFAULT_TAG_HEIGHT_AIM;
-    Robot.isAutonomous = false;
-    m_robotContainer.drivetrain.setMeasureStdDev(0.1, 0.1, 0.1);
-    m_robotContainer.vision.setDistanceOverride(null);
-    m_robotContainer.vision.setAllowVisionOdometry(true);
-    m_robotContainer.vision.setDirectTagAiming(false);
-    m_robotContainer.vision.setShootOnTheFly(true);
-    m_robotContainer.vision.setMegatag2Enabled(false);
-    m_robotContainer.vision.setTeleopTagFilter();
-
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
@@ -112,19 +71,4 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testExit() {}
-
-  @Override
-  public void simulationPeriodic() {}
-
-  public static boolean isBlue() {
-    return blue;
-  }
-
-  public static boolean isRed() {
-    return !blue;
-  }
-
-  public static boolean isAutonomousMode() {
-    return isAutonomous;
-  }
 }
