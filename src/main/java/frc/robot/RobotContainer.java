@@ -13,7 +13,6 @@ import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drive.constants.TunerConstants;
 import frc.robot.subsystems.shooter.ShooterSuperstructure;
 import frc.robot.subsystems.shooter.constants.ShootingMode;
-import frc.robot.subsystems.shooter.shooter.ShooterSubsystem;
 
 public class RobotContainer {
     private final CommandSwerveDrivetrain swerve;

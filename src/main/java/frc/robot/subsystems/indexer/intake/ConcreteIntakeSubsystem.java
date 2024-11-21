@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.subsystems.indexer.constants.IndexerConstants;
+import frc.robot.subsystems.indexer.constants.IndexerPIDs;
 import frc.robot.subsystems.indexer.constants.IndexerState;
 
 public class ConcreteIntakeSubsystem extends IntakeSubsystem {
@@ -32,12 +33,10 @@ public class ConcreteIntakeSubsystem extends IntakeSubsystem {
         intake.setIdleMode(CANSparkBase.IdleMode.kCoast);
 
         pivotPID = new ProfiledPIDController(
-                IndexerConstants.IntakeConstants.INTAKE_PIVOT_kp,
-                IndexerConstants.IntakeConstants.INTAKE_PIVOT_ki,
-                IndexerConstants.IntakeConstants.INTAKE_PIVOT_kd,
+                IndexerPIDs.PIVOT_kP.get(), 0, 0,
                 new TrapezoidProfile.Constraints(
-                        IndexerConstants.IntakeConstants.INTAKE_PIVOT_VELOCITY,
-                        IndexerConstants.IntakeConstants.INTAKE_PIVOT_ACCELERATION
+                        IndexerPIDs.PIVOT_VELOCITY.get(),
+                        IndexerPIDs.PIVOT_ACCELERATION.get()
                 )
         );
 
@@ -51,15 +50,19 @@ public class ConcreteIntakeSubsystem extends IntakeSubsystem {
         this.state = state;
     }
 
-    @Override
-    public void periodic() {
+    private void reachSetpoint() {
         intake.set(state.getIntakeSpeed());
         pivotPID.setGoal(state.getAngle());
         pivotLeft.set(pivotPID.calculate(encoder.get()));
     }
 
     @Override
-    protected double getCurrentAngle() {
+    public void periodic() {
+        reachSetpoint();
+    }
+
+    @Override
+    public double getCurrentAngle() {
         return encoder.get();
     }
 }

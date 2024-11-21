@@ -72,7 +72,7 @@ public class SimPivotSubsystem extends PivotSubsystem {
     }
 
     private void reachSetpoint() {
-        var pidOutput =
+        double pidOutput =
                 pivotPID.calculate(
                         armSim.getAngleRads(),
                         ShooterSuperstructure.getShooterRadians(getAngle(mode))

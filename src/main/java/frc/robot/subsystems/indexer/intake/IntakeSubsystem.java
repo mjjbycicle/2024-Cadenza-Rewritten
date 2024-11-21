@@ -17,5 +17,5 @@ public abstract class IntakeSubsystem extends SubsystemBase {
 
     public abstract void setIntakeState(IndexerState state);
 
-    protected abstract double getCurrentAngle();
+    public abstract double getCurrentAngle();
 }
