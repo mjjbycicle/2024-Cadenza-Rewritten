@@ -28,9 +28,9 @@ public class ShooterPIDs {
         SHOOTER_PIVOT_kD.setDefault(1);
         SHOOTER_PIVOT_VELOCITY.setDefault(10);
         SHOOTER_PIVOT_ACCELERATION.setDefault(10);
-        SHOOTER_SHOOTER_ACCELERATION.setDefault(0.1);
-        SHOOTER_SHOOTER_JERK.setDefault(0.05);
-        SHOOTER_SHOOTER_kP.setDefault(0.1);
-        SHOOTER_SHOOTER_kV.setDefault(0.1);
+        SHOOTER_SHOOTER_ACCELERATION.setDefault(1000);
+        SHOOTER_SHOOTER_JERK.setDefault(1000);
+        SHOOTER_SHOOTER_kP.setDefault(10);
+        SHOOTER_SHOOTER_kV.setDefault(0);
     }
 }

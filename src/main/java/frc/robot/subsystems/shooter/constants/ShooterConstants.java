@@ -20,9 +20,7 @@ public class ShooterConstants {
         public static final int SHOOTER_PIVOT_MOTOR_LEFT = 14;
         public static final int SHOOTER_PIVOT_MOTOR_RIGHT = 19;
 
-        public static final int SHOOTER_SHOOTER_LEFT_MOTOR = 13;
-        public static final int SHOOTER_SHOOTER_RIGHT_MOTOR = 17;
-
+        public static final int SHOOTER_VORTEX = 10;
         public static final int SHOOTER_PIVOT_ENCODER_DIO_PORT = 0;
     }
 }

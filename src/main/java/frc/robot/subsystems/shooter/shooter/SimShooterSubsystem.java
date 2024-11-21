@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -21,40 +22,30 @@ import frc.robot.subsystems.shooter.constants.ShootingMode;
 public class SimShooterSubsystem extends ShooterSubsystem {
     private ShootingMode mode;
     private final FlywheelSim flywheelSim;
-    private final TalonFX shooterMotor;
+    private final ProfiledPIDController velocityPID;
+    private final SimpleMotorFeedforward velocityFF;
 
     public SimShooterSubsystem() {
         mode = ShootingMode.IDLE;
         flywheelSim = new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(
-                        DCMotor.getFalcon500(2),
-                        10,
+                        DCMotor.getNeoVortex(1),
+                        1,
                         1
                 ),
-                DCMotor.getFalcon500(2),
+                DCMotor.getNeoVortex(1),
                 1
         );
-        shooterMotor = new TalonFX(0);
-        shooterMotor.getConfigurator().apply(
-                new TalonFXConfiguration()
-                        .withMotionMagic(
-                                new MotionMagicConfigs()
-                                        .withMotionMagicCruiseVelocity(
-                                             ShooterPIDs.SHOOTER_SHOOTER_ACCELERATION.get()
-                                        )
-                                        .withMotionMagicAcceleration(
-                                                ShooterPIDs.SHOOTER_SHOOTER_JERK.get()
-                                        )
-                        )
-                        .withSlot0(
-                                new Slot0Configs()
-                                        .withKP(
-                                                ShooterPIDs.SHOOTER_SHOOTER_kP.get()
-                                        )
-                                        .withKS(
-                                                ShooterPIDs.SHOOTER_SHOOTER_kV.get()
-                                        )
-                        )
+        velocityPID = new ProfiledPIDController(
+                ShooterPIDs.SHOOTER_SHOOTER_kP.get(),
+                0, 0,
+                new TrapezoidProfile.Constraints(
+                        ShooterPIDs.SHOOTER_SHOOTER_ACCELERATION.get(),
+                        ShooterPIDs.SHOOTER_SHOOTER_JERK.get()
+                )
+        );
+        velocityFF = new SimpleMotorFeedforward(
+                0, ShooterPIDs.SHOOTER_SHOOTER_kV.get()
         );
     }
 
@@ -65,7 +56,10 @@ public class SimShooterSubsystem extends ShooterSubsystem {
 
     @Override
     protected boolean atSpeedSetpoint() {
-        return MathUtil.isNear(getCurrentSpeed(), getSpeed(mode), ShooterConstants.SHOOTER_SPEED_ERROR);
+        return MathUtil.isNear(getCurrentSpeed(),
+                getTargetSpeed(),
+                ShooterConstants.SHOOTER_SPEED_ERROR
+        );
     }
 
     @Override
@@ -77,18 +71,18 @@ public class SimShooterSubsystem extends ShooterSubsystem {
     public void periodic() {
         reachSetpoint();
         flywheelSim.update(0.020);
-        flywheelSim.setState(flywheelSim.getAngularVelocityRPM());
     }
 
     private void reachSetpoint() {
-        shooterMotor.setControl(new MotionMagicVelocityVoltage(getSpeed(mode)));
-        flywheelSim.setInputVoltage(shooterMotor.getMotorVoltage().getValueAsDouble());
-        SmartDashboard.putNumber("Motor Output", shooterMotor.getMotorVoltage().getValueAsDouble());
-        shooterMotor.getSimState().setRotorVelocity(flywheelSim.getAngularVelocityRPM() / 60.0);
+        velocityPID.setGoal(getTargetSpeed());
+        double output = velocityPID.calculate(getCurrentSpeed())
+                + velocityFF.calculate(getCurrentSpeed());
+        flywheelSim.setInputVoltage(output);
+        SmartDashboard.putNumber("Motor Output", output);
     }
 
     @Override
     public double getTargetSpeed() {
-        return getSpeed(mode);
+        return mode.getSetPoint().speed();
     }
 }

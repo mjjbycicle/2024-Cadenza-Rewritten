@@ -29,15 +29,5 @@ public abstract class ShooterSubsystem extends SubsystemBase {
 
     public abstract double getCurrentSpeed();
 
-    public static double getSpeed(ShootingMode mode) {
-        return switch (mode) {
-            case IDLE -> 0;
-            case SPINUP -> ShooterConstants.SHOOTER_SPINUP_SPEED;
-            case AUTO -> AimUtil.getShooterSetpoint().speed();
-            case MANUAL -> ShooterConstants.SHOOTER_MANUAL_SPEED;
-            case LAUNCH -> ShooterConstants.SHOOTER_LAUNCH_SPEED;
-        };
-    }
-
     public abstract double getTargetSpeed();
 }

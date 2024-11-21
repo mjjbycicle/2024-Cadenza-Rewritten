@@ -1,11 +1,16 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Drive/Field": "Field2d",
-      "/SmartDashboard/Shooter Pivot": "Mechanism2d",
-      "/SmartDashboard/Shooter/Mech": "Mechanism2d",
-      "/SmartDashboard/arm mech": "Mechanism2d"
+      "/SmartDashboard/Shooter Pivot": "Mechanism2d"
     },
     "windows": {
       "/SmartDashboard/Drive/Field": {
@@ -30,9 +35,9 @@
     "transitory": {
       "SmartDashboard": {
         "Shooter": {
-          "open": true
+          "open": false
         },
-        "ShooterSuperstructure": {
+        "Shooter Pivot": {
           "open": true
         },
         "open": true
