@@ -2,6 +2,7 @@ package frc.robot.subsystems.drive;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.*;
 import com.ctre.phoenix6.mechanisms.swerve.utility.PhoenixPIDController;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.CommandsUtil;
 import frc.lib.DriverStationUtil;
 import frc.lib.LimelightHelpers;
@@ -40,6 +42,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static edu.wpi.first.units.Units.Volts;
+
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
  * subsystem, so it can be used in command-based projects easily.
@@ -52,6 +56,24 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
     private final SwerveRequest.FieldCentric fieldCentricRequest = new SwerveRequest.FieldCentric();
     private final SwerveRequest.FieldCentricFacingAngle SOTFRequest = new SwerveRequest.FieldCentricFacingAngle();
+    private final SwerveRequest.SysIdSwerveTranslation sysidTranslation = new SwerveRequest.SysIdSwerveTranslation();
+    private final SwerveRequest.SysIdSwerveRotation sysidRotation = new SwerveRequest.SysIdSwerveRotation();
+    private final SwerveRequest.SysIdSwerveSteerGains sysidSteer = new SwerveRequest.SysIdSwerveSteerGains();
+
+    private final SysIdRoutine m_sysIdRoutine =
+            new SysIdRoutine(
+                    new SysIdRoutine.Config(
+                            null,
+                            Volts.of(4),
+                            null,
+                            (state) -> SignalLogger.writeString("state", state.toString())
+                    ),
+                    new SysIdRoutine.Mechanism(
+                            (volts) -> this.setControl(sysidTranslation.withVolts(volts)),
+                            null,
+                            this
+                    )
+            );
 
     private final Field2d field = new Field2d();
 
@@ -143,6 +165,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public void periodic() {
         field.setRobotPose(getPose());
         SmartDashboard.putData("Drive/Field", field);
+        SmartDashboard.putString("Drive/Command", getCurrentCommand() == null? "none" : getCurrentCommand().getName());
         LimelightHelpers.PoseEstimate pose = validatePoseEstimate(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight"), Timer.getFPGATimestamp());
         if (pose != null) {
             addVisionMeasurement(pose.pose, Timer.getFPGATimestamp());
@@ -273,9 +296,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     @Override
     public void initSendable(SendableBuilder sendableBuilder) {
         sendableBuilder.setSmartDashboardType("Drive");
-        sendableBuilder.addDoubleProperty("Heading",
+        sendableBuilder.addDoubleProperty(
+                "Heading",
                 () -> getRotation2d().getDegrees(),
                 null);
+        sendableBuilder.addStringProperty(
+                "Command",
+                () -> this.getCurrentCommand().getName(),
+                null
+        );
     }
 
     public static CommandSwerveDrivetrain getInstance() {
@@ -313,5 +342,13 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     private Trigger inLaunchRange() {
         return new Trigger(() -> AimUtil.getSpeakerVector().getX() <= 10.6934);
+    }
+
+    public Command quasistatic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.quasistatic(direction).withName("quasistatic " + direction.name());
+    }
+
+    public Command dynamic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.dynamic(direction).withName("dynamic " + direction.name());
     }
 }

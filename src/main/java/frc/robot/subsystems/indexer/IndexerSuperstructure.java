@@ -56,7 +56,7 @@ public class IndexerSuperstructure extends SubsystemBase {
     }
 
     public Command setIndexerStateCommand(IndexerState state) {
-        return Commands.runOnce(() -> setIndexerState(state));
+        return runOnce(() -> setIndexerState(state));
     }
 
     @Override

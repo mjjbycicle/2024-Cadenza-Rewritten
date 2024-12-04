@@ -18,6 +18,7 @@ public class SimIntakeSubsystem extends IntakeSubsystem {
     private final SingleJointedArmSim armSim;
 
     public SimIntakeSubsystem() {
+        state = IndexerState.IDLE;
         pivotPID = new ProfiledPIDController(
                 ShooterPIDs.SHOOTER_PIVOT_kP.get(),
                 ShooterPIDs.SHOOTER_PIVOT_kI.get(),
@@ -41,7 +42,6 @@ public class SimIntakeSubsystem extends IntakeSubsystem {
                 true,
                 ShooterSuperstructure.getShooterRadians(state.getAngle())
         );
-        state = IndexerState.IDLE;
     }
 
     @Override

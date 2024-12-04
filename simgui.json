@@ -10,6 +10,7 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Drive/Field": "Field2d",
+      "/SmartDashboard/Intake Arm": "Mechanism2d",
       "/SmartDashboard/Shooter Pivot": "Mechanism2d"
     },
     "windows": {
@@ -24,6 +25,11 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Intake Arm": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Shooter Pivot": {
         "window": {
           "visible": true
@@ -34,6 +40,9 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
+        "Drive": {
+          "open": true
+        },
         "Shooter": {
           "open": false
         },

@@ -1,6 +1,7 @@
 package frc.lib;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.constants.Constants.DEADZONE_VALUE;
 
@@ -41,11 +42,11 @@ public class Controller extends XboxController {
     return Math.signum(value) * ((Math.abs(value) - DEADZONE_VALUE) / (1 - DEADZONE_VALUE));
   }
 
-  public boolean leftTrigger() {
-    return super.getLeftTriggerAxis() >= 0.5;
+  public Trigger leftTrigger() {
+    return new Trigger(() -> super.getLeftTriggerAxis() >= 0.5);
   }
 
-  public boolean rightTrigger() {
-    return super.getRightTriggerAxis() >= 0.5;
+  public Trigger rightTrigger() {
+    return new Trigger(() -> super.getRightTriggerAxis() >= 0.5);
   }
 }
