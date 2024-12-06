@@ -1,7 +1,7 @@
 {
-  "Joysticks": {
+  "Keyboard 0 Settings": {
     "window": {
-      "visible": false
+      "visible": true
     }
   },
   "keyboardJoysticks": [
@@ -16,18 +16,13 @@
           "incKey": 68
         },
         {
-          "decKey": 69,
           "incKey": 82
         },
         {
           "incKey": 81
-        },
-        {
-          "decKey": 71,
-          "incKey": 70
         }
       ],
-      "axisCount": 5,
+      "axisCount": 4,
       "buttonCount": 4,
       "buttonKeys": [
         90,

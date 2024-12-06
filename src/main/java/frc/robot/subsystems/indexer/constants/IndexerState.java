@@ -2,42 +2,42 @@ package frc.robot.subsystems.indexer.constants;
 
 public enum IndexerState {
     INTAKING(
-            IndexerConstants.IntakeConstants.INTAKE_PIVOT_EXTENDED_SETPOINT,
-            IndexerConstants.IntakeConstants.INTAKE_SPEED,
+            IndexerConstants.INTAKE_PIVOT_EXTENDED_SETPOINT,
+            IndexerConstants.INTAKE_SPEED,
             IndexerConstants.HOPPER_SPEED
     ),
     OUTTAKING(
-            IndexerConstants.IntakeConstants.INTAKE_PIVOT_DEFAULT_SETPOINT,
-            -IndexerConstants.IntakeConstants.INTAKE_SPEED,
+            IndexerConstants.INTAKE_PIVOT_DEFAULT_SETPOINT,
+            -IndexerConstants.INTAKE_SPEED,
             -IndexerConstants.HOPPER_SPEED
     ),
     AMP_PREP(
-            IndexerConstants.IntakeConstants.INTAKE_PIVOT_EXTENDED_SETPOINT,
-            -IndexerConstants.IntakeConstants.INTAKE_SPEED,
+            IndexerConstants.INTAKE_PIVOT_EXTENDED_SETPOINT,
+            -IndexerConstants.INTAKE_SPEED,
             -IndexerConstants.HOPPER_SPEED
     ),
     AMP_READY(
-            IndexerConstants.IntakeConstants.INTAKE_PIVOT_DEFAULT_SETPOINT,
+            IndexerConstants.INTAKE_PIVOT_DEFAULT_SETPOINT,
             0,
             0
     ),
     AMPING(
-            IndexerConstants.IntakeConstants.INTAKE_PIVOT_AMP_SETPOINT,
-            IndexerConstants.IntakeConstants.AMP_OUTTAKE_SPEED,
+            IndexerConstants.INTAKE_PIVOT_AMP_SETPOINT,
+            IndexerConstants.AMP_OUTTAKE_SPEED,
             0
     ),
     IDLE(
-            IndexerConstants.IntakeConstants.INTAKE_PIVOT_DEFAULT_SETPOINT,
+            IndexerConstants.INTAKE_PIVOT_DEFAULT_SETPOINT,
             0,
             0
     ),
     FEED(
-            IndexerConstants.IntakeConstants.INTAKE_PIVOT_DEFAULT_SETPOINT,
+            IndexerConstants.INTAKE_PIVOT_DEFAULT_SETPOINT,
             0,
             IndexerConstants.HOPPER_SPEED
     ),
     EXTENDED(
-            IndexerConstants.IntakeConstants.INTAKE_PIVOT_EXTENDED_SETPOINT,
+            IndexerConstants.INTAKE_PIVOT_EXTENDED_SETPOINT,
             0,
             0
     );

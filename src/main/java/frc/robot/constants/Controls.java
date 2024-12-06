@@ -26,18 +26,8 @@ public final class Controls {
           OI oi = OI.getInstance();
           return -oi.driverController().getRightX() * TELOP_ROTATION_SPEED;
         };
-    public static final Trigger AimButton =
-        new Trigger(
-            () -> {
-              OI oi = OI.getInstance();
-              return oi.driverController().leftTrigger();
-            });
-    public static final Trigger SOTF =
-        new Trigger(
-            () -> {
-              OI oi = OI.getInstance();
-              return oi.driverController().rightTrigger();
-            });
+    public static final Trigger AimButton = OI.getInstance().driverController().leftTrigger();
+    public static final Trigger SOTF = OI.getInstance().driverController().rightTrigger();
     public static final Trigger ClimberExtendButton =
         new Trigger(
             () -> {
@@ -86,24 +76,16 @@ public final class Controls {
   }
 
   public static final class OperatorControls {
-    public static final Trigger RunSpeakerShooterButton =
-        new Trigger(
-            () -> {
-              OI oi = OI.getInstance();
-              return oi.operatorController().rightTrigger();
-            });
+    public static final Trigger RunSpeakerShooterButton = OI.getInstance().operatorController().rightTrigger();
+
     public static final Trigger RunAmpShooterButton =
         new Trigger(
             () -> {
               OI oi = OI.getInstance();
               return oi.operatorController().getLeftBumper();
             });
-    public static final Trigger ManualShooterButton =
-        new Trigger(
-            () -> {
-              OI oi = OI.getInstance();
-              return oi.operatorController().leftTrigger();
-            });
+
+    public static final Trigger ManualShooterButton = OI.getInstance().operatorController().leftTrigger();
 
     public static final Trigger IntakeButton =
         new Trigger(
@@ -111,30 +93,35 @@ public final class Controls {
               OI oi = OI.getInstance();
               return oi.operatorController().getXButton();
             });
+
     public static final Trigger OuttakeButton =
         new Trigger(
             () -> {
               OI oi = OI.getInstance();
               return oi.operatorController().getYButton();
             });
+
     public static final Trigger IntakeExtendButton =
         new Trigger(
             () -> {
               OI oi = OI.getInstance();
               return oi.operatorController().getPOV() == 180;
             });
+
     public static final Trigger IntakeRetractButton =
         new Trigger(
             () -> {
               OI oi = OI.getInstance();
               return oi.operatorController().getPOV() == 0;
             });
+
     public static final Trigger ToggleIR =
         new Trigger(
             () -> {
               OI oi = OI.getInstance();
               return oi.operatorController().getAButton();
             });
+
     public static final Trigger LaunchShooterButton =
         new Trigger(
             () -> {

@@ -6,14 +6,17 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.subsystems.indexer.constants.IndexerConstants;
+import frc.robot.subsystems.indexer.constants.IndexerPIDs;
 import frc.robot.subsystems.indexer.constants.IndexerState;
 
 public class ConcreteIntakeSubsystem extends IntakeSubsystem {
     private final CANSparkMax pivotLeft, pivotRight, intake;
     private final ProfiledPIDController pivotPID;
-    private final double startAngle;
+    private final DutyCycleEncoder encoder;
 
     private IndexerState state;
+
+    private static ConcreteIntakeSubsystem instance;
 
     ConcreteIntakeSubsystem() {
         pivotLeft = new CANSparkMax(IndexerConstants.IDs.INTAKE_PIVOT_MOTOR_LEFT,
@@ -30,17 +33,14 @@ public class ConcreteIntakeSubsystem extends IntakeSubsystem {
         intake.setIdleMode(CANSparkBase.IdleMode.kCoast);
 
         pivotPID = new ProfiledPIDController(
-                IndexerConstants.IntakeConstants.INTAKE_PIVOT_kp,
-                IndexerConstants.IntakeConstants.INTAKE_PIVOT_ki,
-                IndexerConstants.IntakeConstants.INTAKE_PIVOT_kd,
+                IndexerPIDs.PIVOT_kP.get(), 0, 0,
                 new TrapezoidProfile.Constraints(
-                        IndexerConstants.IntakeConstants.INTAKE_PIVOT_VELOCITY,
-                        IndexerConstants.IntakeConstants.INTAKE_PIVOT_ACCELERATION
+                        IndexerPIDs.PIVOT_VELOCITY.get(),
+                        IndexerPIDs.PIVOT_ACCELERATION.get()
                 )
         );
 
-        DutyCycleEncoder encoder = new DutyCycleEncoder(IndexerConstants.IDs.INTAKE_ENCODER_DIO_PORT);
-        startAngle = (encoder.getAbsolutePosition() + 1) % 1;
+        encoder = new DutyCycleEncoder(IndexerConstants.IDs.INTAKE_ENCODER_DIO_PORT);
 
         state = IndexerState.IDLE;
     }
@@ -50,15 +50,19 @@ public class ConcreteIntakeSubsystem extends IntakeSubsystem {
         this.state = state;
     }
 
-    @Override
-    public void periodic() {
+    private void reachSetpoint() {
         intake.set(state.getIntakeSpeed());
         pivotPID.setGoal(state.getAngle());
-//        pivotLeft.set(pivotPID.calculate(getCurrentAngle()));
+        pivotLeft.set(pivotPID.calculate(encoder.get()));
     }
 
     @Override
-    protected double getCurrentAngle() {
-        return startAngle + pivotLeft.getEncoder().getPosition() / 81.0;
+    public void periodic() {
+        reachSetpoint();
+    }
+
+    @Override
+    public double getCurrentAngle() {
+        return encoder.get();
     }
 }

@@ -2,6 +2,7 @@ package frc.robot.subsystems.indexer.hopper;
 
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.indexer.constants.IndexerConstants;
 import frc.robot.subsystems.indexer.constants.IndexerState;
@@ -15,6 +16,7 @@ public class ConcreteHopperSubsystem extends HopperSubsystem {
         hopper = new CANSparkMax(IndexerConstants.IDs.HOPPER_MOTOR, CANSparkMax.MotorType.kBrushed);
         DigitalInput ir = new DigitalInput(IndexerConstants.IDs.IR_SENSOR_1_DIO_PORT);
         hasNoteTrigger = new Trigger(ir::get).negate().debounce(0.5);
+        setIndexerState(IndexerState.IDLE);
     }
 
     @Override
@@ -26,5 +28,10 @@ public class ConcreteHopperSubsystem extends HopperSubsystem {
     @Override
     public Trigger hasNoteTrigger() {
         return hasNoteTrigger;
+    }
+
+    @Override
+    public void periodic () {
+        SmartDashboard.putString("hopper state", state.name());
     }
 }
